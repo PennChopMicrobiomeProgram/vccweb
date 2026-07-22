@@ -20,7 +20,6 @@ bp = Blueprint("hvp", __name__)
 ### Auth ###
 @bp.before_request
 def require_login():
-    return
     # Skip check if endpoint is unknown (static files, bad requests)
     if request.endpoint is None:
         return
