@@ -46,7 +46,7 @@ def create_app(
                 db.commit()
             db.close()
 
-    app.register_blueprint(hvp_bp, url_prefix="/hvp")
+    app.register_blueprint(hvp_bp)
 
     return app
 
