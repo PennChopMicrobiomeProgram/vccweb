@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hvp-db"
+name = "vccweb"
 version = "0.1.0"
-description = "UPenn Human Virome Project sample database"
+description = "HVP Virome Characterization Center (VCC) sample browser"
 readme = "README.md"
 
 requires-python = ">=3.8"
@@ -21,4 +21,4 @@ web = [
 ]
 
 [project.scripts]
-hvp-db = "hvp_db.cli:main"
+vccweb = "vccweb.cli:main"

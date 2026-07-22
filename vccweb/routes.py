@@ -11,7 +11,7 @@ from flask import (
     session,
     url_for,
 )
-from hvp_db.models import Sample
+from vccweb.models import Sample
 
 
 bp = Blueprint("hvp", __name__)

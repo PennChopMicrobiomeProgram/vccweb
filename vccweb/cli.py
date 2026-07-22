@@ -1,8 +1,8 @@
 import argparse
 import csv
 from datetime import date
-from hvp_db.app import main as run_web_app
-from hvp_db.models import Sample, get_session_maker, init_engine
+from vccweb.app import main as run_web_app
+from vccweb.models import Sample, get_session_maker, init_engine
 from sqlalchemy import Date, Enum
 from typing import Dict
 

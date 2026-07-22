@@ -1,6 +1,6 @@
 """Human Virome Project database models."""
 
-from hvp_db.models import (
+from vccweb.models import (
     Base,
     Sample,
     get_session_maker,

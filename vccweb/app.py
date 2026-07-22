@@ -1,8 +1,8 @@
 import os
 import uuid
 from flask import Flask, g
-from hvp_db.database import db_session
-from hvp_db.routes import bp as hvp_bp
+from vccweb.database import db_session
+from vccweb.routes import bp as hvp_bp
 from typing import Optional
 
 
@@ -15,7 +15,7 @@ def create_app(
     Parameters
     ----------
     database_url:
-        Database URL passed to :func:`hvp_db.get_session_maker`.
+        Database URL passed to :func:`vccweb.get_session_maker`.
     shared_password:
         Password required to log in. If not provided, it will be read from
         the environment variable `HVP_DB_PASSWORD`
