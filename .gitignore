@@ -1,4 +1,5 @@
-# Custom
+# Databases
+hvp.db
 *.sqlite
 *.sqlite3
 
