@@ -100,6 +100,3 @@ def main(argv: list[str] | None = None) -> None:
     else:
         parser.error(f"Unknown command {args.command}")
 
-
-if __name__ == "__main__":  # pragma: no cover - CLI entry point
-    main()

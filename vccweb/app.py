@@ -54,7 +54,3 @@ def create_app(
 def main(database_url: str, shared_password: str) -> None:
     app = create_app(database_url, shared_password)
     app.run(debug=True)
-
-
-if __name__ == "__main__":
-    main("sqlite:///hvp.db", "password")
