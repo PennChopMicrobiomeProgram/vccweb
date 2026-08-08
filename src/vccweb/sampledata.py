@@ -34,10 +34,3 @@ class SampleData(Table):
     def rows(self):
         for row in zip(*self.data.values()):
             yield list("" if x is None else x for x in row)
-
-    @property
-    def row_dicts(self):
-        colnames = self.data.keys()
-        rows = zip(*self.data.values())
-        for row in rows:
-            yield dict(zip(colnames, row))
