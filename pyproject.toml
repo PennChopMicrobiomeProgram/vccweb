@@ -9,10 +9,9 @@ description = "HVP Virome Characterization Center (VCC) sample browser"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-    "SQLAlchemy~=2.0"
     "Flask~=2.0",
-    "flask_sqlalchemy~=3.1",
     "gunicorn",
+    "tablemusthave",
 ]
 
 [project.scripts]

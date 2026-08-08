@@ -72,155 +72,26 @@
   }
 </style>
 
-<div class="samples-controls">
-  <div class="column-toggle-panel">
-    <h2>Select columns to display</h2>
-    <div id="column-toggle-grid" class="column-toggle-grid"></div>
-  </div>
-</div>
-
 <table id="samples-table" class="display nowrap" cellspacing="0">
   <thead>
     <tr>
-    {% for col in columns %}<th>{{ col }}</th>{% endfor %}
-    </tr>
-    <tr class="filter-row">
-    {% for col in columns %}<th><input type="text" placeholder="Search" data-column-index="{{ loop.index0 }}"></th>{% endfor %}
+    {% for col in data.column_names %}<th>{{ col }}</th>{% endfor %}
     </tr>
   </thead>
+  <tbody>
+    {% for row in data.rows %}
+    <tr>
+      {% for val in row %}
+      <td>{{ val }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
+
 <script>
-  const columns = {{ columns | tojson }};
-  const dateColumns = {{ date_columns | tojson }};
-  const alwaysVisibleColumns = new Set([
-    'sample_id'
-  ]);
-  const defaultVisibleColumns = new Set([
-    'sample_id',
-    'sample_id_alias',
-    'participant_id',
-    'anatomical_site',
-    'lab_origin',
-    'date_hvp_custody',
-    'prep_type',
-    'extraction_type',
-    'sequence_run_id'
-  ]);
-  const stickyColumnName = 'sample_id';
-
-  function formatDateValue(value) {
-    if (!value) {
-      return '';
-    }
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return value;
-    }
-    return parsed.toISOString().split('T')[0];
-  }
-
   $(document).ready(function() {
-    const dateColumnIndices = dateColumns
-      .map(name => columns.indexOf(name))
-      .filter(index => index !== -1);
-
-    const columnDefs = [];
-
-    const stickyColumnIndex = columns.indexOf(stickyColumnName);
-    if (stickyColumnIndex !== -1) {
-      columnDefs.push({
-        targets: stickyColumnIndex,
-        className: 'sticky-column'
-      });
-    }
-
-    if (dateColumnIndices.length) {
-      columnDefs.push({
-        targets: dateColumnIndices,
-        render: function(data, type) {
-          if (!data) {
-            return '';
-          }
-          const formatted = formatDateValue(data);
-          if (type === 'sort') {
-            return formatted.replace(/-/g, '');
-          }
-          return formatted;
-        }
-      });
-    }
-
-    const table = $('#samples-table').DataTable({
-      ajax: {
-        url: {{ url_for('hvp.samples_api') | tojson }},
-        dataSrc: 'data'
-      },
-      columns: columns.map(col => ({
-        data: col,
-        title: col,
-        visible: defaultVisibleColumns.has(col) || alwaysVisibleColumns.has(col)
-      })),
-      columnDefs: columnDefs,
-      dom: 'Bfrtip',
-      buttons: [
-        {
-          extend: 'csvHtml5',
-          text: 'Export CSV',
-          title: 'samples',
-          exportOptions: {
-            columns: ':visible'
-          }
-        }
-      ],
-      orderCellsTop: true,
-      scrollX: true,
-      autoWidth: false,
-      deferRender: true
-    });
-
-    const $tableContainer = $(table.table().container());
-    $tableContainer.on('keyup change input', 'thead tr.filter-row input', function() {
-      const columnIndex = $(this).data('column-index');
-      const column = table.column(columnIndex);
-      const value = this.value;
-
-      if (column.search() !== value) {
-        column.search(value).draw();
-      }
-    });
-
-    const $columnToggleGrid = $('#column-toggle-grid');
-    columns.forEach(function(columnName, index) {
-      const id = `column-toggle-${index}`;
-      const isRequired = alwaysVisibleColumns.has(columnName);
-      const isChecked = isRequired || defaultVisibleColumns.has(columnName);
-      const $checkbox = $('<input>', {
-        type: 'checkbox',
-        id,
-        checked: isChecked,
-        'data-column-index': index,
-        disabled: isRequired
-      });
-
-      const $label = $('<label>', { for: id });
-      $label.append($checkbox, $('<span>').text(columnName));
-      $columnToggleGrid.append($label);
-    });
-
-    $columnToggleGrid.on('change', 'input[type="checkbox"]', function() {
-      const columnIndex = $(this).data('column-index');
-      const column = table.column(columnIndex);
-      column.visible(this.checked);
-      table.columns.adjust().draw(false);
-    });
-
-    table.on('column-visibility.dt draw.dt', function() {
-      table.columns.adjust();
-    });
-
-    $(window).on('resize', function() {
-      table.columns.adjust();
-    });
+    new DataTable('#samples-table');
   });
 </script>
 {% endblock %}

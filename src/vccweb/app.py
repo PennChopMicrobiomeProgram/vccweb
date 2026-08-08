@@ -1,56 +1,75 @@
-import os
 import uuid
-from flask import Flask, g
-from vccweb.database import db_session
-from vccweb.routes import bp as hvp_bp
-from typing import Optional
+from flask import (
+    Blueprint,
+    current_app,
+    Flask,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 
-def create_app(
-    database_url: str,
-    shared_password: Optional[str] = None,
-) -> Flask:
-    """Create and configure the Flask application.
+vcc = Blueprint("vcc", __name__)
 
-    Parameters
-    ----------
-    database_url:
-        Database URL passed to :func:`vccweb.get_session_maker`.
-    shared_password:
-        Password required to log in. If not provided, it will be read from
-        the environment variable `HVP_DB_PASSWORD`
-    """
+
+@vcc.before_request
+def require_login():
+    # If already authenticated, continue
+    if session.get("authenticated"):
+        return
+
+    # Endpoint unknown for static files and bad requests
+    if request.endpoint is None:
+        return
+
+    # Endpoints allowed without auth
+    exempt_endpoints = {"vcc.login", "static"}
+    if request.endpoint in exempt_endpoints:
+        return
+
+    # Prevent redirect loop: don't redirect /login?next=/login
+    if request.path.startswith(url_for("vcc.login")):
+        return
+
+    # Redirect to login page with original path as `next`
+    return redirect(url_for("vcc.login", next=request.path))
+
+
+@vcc.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    next_url = request.args.get("next") or url_for("vcc.samples")
+
+    if request.method == "POST":
+        if request.form.get("password") == current_app.config["SHARED_PASSWORD"]:
+            session["authenticated"] = True
+            return redirect(next_url)
+        error = "Incorrect password"
+
+    return render_template("login.html", error=error)
+
+
+@vcc.route("/logout")
+def logout():
+    session.pop("authenticated", None)
+    return redirect(url_for("vcc.login"))
+
+
+@vcc.route("/")
+def samples():
+    data = current_app.config["DATA"]
+    return render_template("samples.html", data=data)
+
+
+def create_app(input_data, shared_password):
     app = Flask(__name__, static_url_path="/static")
     app.secret_key = uuid.uuid4().hex
-    if shared_password is None:
-        shared_password = os.environ.get("HVP_DB_PASSWORD")
-    assert shared_password is not None, (
-        "No shared password provided. Set the HVP_DB_PASSWORD environment variable or "
-        "pass a password to create_app."
-    )
     app.config["SHARED_PASSWORD"] = shared_password
-
     app.config["SESSION_COOKIE_PATH"] = "/"
+    app.config["DATA"] = input_data
 
-    @app.before_request
-    def create_session():
-        g.db = db_session(database_url)()
-
-    @app.teardown_request
-    def remove_session(exception=None):
-        db = g.pop("db", None)
-        if db is not None:
-            if exception:
-                db.rollback()
-            else:
-                db.commit()
-            db.close()
-
-    app.register_blueprint(hvp_bp)
+    app.register_blueprint(vcc)
 
     return app
-
-
-def main(database_url: str, shared_password: str) -> None:
-    app = create_app(database_url, shared_password)
-    app.run(debug=True)

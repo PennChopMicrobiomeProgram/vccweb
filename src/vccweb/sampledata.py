@@ -20,14 +20,17 @@ spec = MustHave(
     values_matching("virome_prep_date", date_pattern),
 )
 
-class InputData(Table):
+class SampleData(Table):
     spec = spec
 
     def check(self):
         return self.spec.check(self)
 
-    def row_dicts(self):
-        colnames = self.data.keys()
-        rows = zip(*self.data.values())
-        for row in rows:
-            yield dict(zip(colnames, row))
+    @property
+    def column_names(self):
+        return list(self.data.keys())
+
+    @property
+    def rows(self):
+        for row in zip(*self.data.values()):
+            yield list("" if x is None else x for x in row)
