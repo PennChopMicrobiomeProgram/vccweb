@@ -2,34 +2,14 @@ import os
 import uuid
 from flask import Flask, g
 from vccweb.database import db_session
-from vccweb.routes import bp as hvp_bp
+from vccweb.routes import auth, vcc
 from typing import Optional
 
 
-def create_app(
-    database_url: str,
-    shared_password: Optional[str] = None,
-) -> Flask:
-    """Create and configure the Flask application.
-
-    Parameters
-    ----------
-    database_url:
-        Database URL passed to :func:`vccweb.get_session_maker`.
-    shared_password:
-        Password required to log in. If not provided, it will be read from
-        the environment variable `HVP_DB_PASSWORD`
-    """
+def create_app(database_url: str, shared_password: str) -> Flask:
     app = Flask(__name__, static_url_path="/static")
     app.secret_key = uuid.uuid4().hex
-    if shared_password is None:
-        shared_password = os.environ.get("HVP_DB_PASSWORD")
-    assert shared_password is not None, (
-        "No shared password provided. Set the HVP_DB_PASSWORD environment variable or "
-        "pass a password to create_app."
-    )
     app.config["SHARED_PASSWORD"] = shared_password
-
     app.config["SESSION_COOKIE_PATH"] = "/"
 
     @app.before_request
@@ -46,11 +26,9 @@ def create_app(
                 db.commit()
             db.close()
 
-    app.register_blueprint(hvp_bp)
+    app.register_blueprint(auth)
+    app.register_blueprint(vcc)
 
     return app
 
 
-def main(database_url: str, shared_password: str) -> None:
-    app = create_app(database_url, shared_password)
-    app.run(debug=True)

@@ -11,42 +11,37 @@ from flask import (
     session,
     url_for,
 )
-from vccweb.models import Library
 
 
-bp = Blueprint("hvp", __name__)
+auth = Blueprint("auth", __name__)
 
-
-### Auth ###
-@bp.before_request
+@auth.before_request
 def require_login():
-    # Skip check if endpoint is unknown (static files, bad requests)
-    if request.endpoint is None:
-        return
-
-    # These endpoints are allowed without auth
-    exempt_endpoints = {"hvp.login", "static"}
-
     # If already authenticated, continue
     if session.get("authenticated"):
         return
 
-    # If the request is for an exempt endpoint, allow
+    # Endpoint unknown for static files and bad requests
+    if request.endpoint is None:
+        return
+
+    # Endpoints allowed without auth
+    exempt_endpoints = {"auth.login", "static"}
     if request.endpoint in exempt_endpoints:
         return
 
-    # Prevent redirect loop: don't redirect /hvp/login?next=/hvp/login
-    if request.path.startswith(url_for("hvp.login")):
+    # Prevent redirect loop: don't redirect /login?next=/login
+    if request.path.startswith(url_for("auth.login")):
         return
 
     # Redirect to login page with original path as `next`
-    return redirect(url_for("hvp.login", next=request.path))
+    return redirect(url_for("auth.login", next=request.path))
 
 
-@bp.route("/login", methods=["GET", "POST"])
+@auth.route("/login", methods=["GET", "POST"])
 def login():
     error = None
-    next_url = request.args.get("next") or url_for("hvp.index")
+    next_url = request.args.get("next") or url_for("samples.index")
 
     if request.method == "POST":
         if request.form.get("password") == current_app.config["SHARED_PASSWORD"]:
@@ -57,35 +52,31 @@ def login():
     return render_template("login.html", error=error)
 
 
-@bp.route("/logout")
+@auth.route("/logout")
 def logout():
     session.pop("authenticated", None)
-    return redirect(url_for("hvp.login"))
+    return redirect(url_for("auth.login"))
 
+
+vcc = Blueprint("vcc", __name__)
 
 ### Pages ###
-@bp.route("/")
+@vcc.route("/")
 def index():
     return render_template("index.html")
 
 
-@bp.route("/samples")
+@vcc.route("/libraries")
 def samples():
-    table_columns = Sample.__table__.columns
-    columns = [c.name for c in table_columns]
-    date_columns = []
-    for column in table_columns:
-        try:
-            python_type = column.type.python_type
-        except NotImplementedError:
-            continue
-        if python_type is date_type:
-            date_columns.append(column.name)
+    header = list(Library.__table__.columns.keys())
+    list(inspect(Library).column_attrs.keys())
+
+    attrs = list(inspect(Model).column_attrs)
     return render_template("samples.html", columns=columns, date_columns=date_columns)
 
 
 ### API ###
-@bp.route("/api/samples")
+@vcc.route("/api/samples")
 def samples_api():
     columns = [c.name for c in Sample.__table__.columns]
     db = g.db

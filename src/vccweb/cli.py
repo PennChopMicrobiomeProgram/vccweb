@@ -4,8 +4,17 @@ from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
 
 from vccweb.csvdata import InputData
-from vccweb.models import Library, Base
-from vccweb.app import main as run_web_app
+from vccweb.app import create_app
+from vccweb.models import create_db, samples_table
+from sqlalchemy import inspect
+
+
+def load_data(url, input_data):
+    engine = create_engine(args.url, echo=True)
+    rows = list(input_data.row_dicts())
+    stmt = insert(samples_table)
+    with engine.begin() as connection:
+        connection.execute(stmt, rows)
 
 
 def main(argv=None):
@@ -24,22 +33,12 @@ def main(argv=None):
             print(requirement.description())
             print(result.message())
 
-    engine = create_engine(args.url, echo=True)
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
+    create_db(args.url)
+    print(list(samples_table.columns.keys()))
 
-    rows = list(input_data.row_dicts())
-    with Session() as session:
-        try:
-            # High-performance bulk insert using the Core insert() construct
-            session.execute(insert(Library), rows)
-            session.commit()
-            print(f"Successfully loaded {len(rows)} records.")
-        except Exception as e:
-            session.rollback()
-            print(f"An error occurred: {e}")
-            raise
+    load_data(args.url, input_data)
 
-    # run_web_app(args.url, args.password)
+    #app = create_app(database_url, shared_password)
+    #app.run(debug=True)
+
 
