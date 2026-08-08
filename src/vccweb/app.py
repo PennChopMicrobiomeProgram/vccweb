@@ -62,6 +62,11 @@ def samples():
     data = current_app.config["DATA"]
     return render_template("samples.html", data=data)
 
+@vcc.route("/validate")
+def validate():
+    data = current_app.config["DATA"]
+    results = data.check()
+    return render_template("validation.html", results=results)
 
 def create_app(input_data, shared_password):
     app = Flask(__name__, static_url_path="/static")

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<pre>
+{% for requirement, result in results %}
+{{ requirement.description() }}  
+{{ result.message() }}
+{% endfor %}
+</pre>
+{% endblock %}

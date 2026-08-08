@@ -99,6 +99,7 @@
         {% if session.get("authenticated") %}
         <nav class="banner-nav">
           <a href="{{ url_for('vcc.samples') }}">Samples</a>
+	  <a href="{{ url_for('vcc.validate') }}">Validation</a>
         </nav>
         {% endif %}
       </div>
