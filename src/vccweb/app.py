@@ -71,6 +71,7 @@ def validate():
 def create_app(input_data, shared_password):
     app = Flask(__name__, static_url_path="/static")
     app.secret_key = uuid.uuid4().hex
+    
     app.config["SHARED_PASSWORD"] = shared_password
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["DATA"] = input_data

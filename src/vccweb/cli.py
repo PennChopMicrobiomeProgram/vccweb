@@ -15,9 +15,5 @@ def main(argv=None):
     with open(args.datafile) as f:
         data = SampleData.from_csv(f)
 
-        for requirement, result in data.check():
-            print(requirement.description())
-            print(result.message())
-
     app = create_app(data, args.password)
     app.run(debug=True)
