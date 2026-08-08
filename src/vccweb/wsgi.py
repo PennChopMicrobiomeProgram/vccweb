@@ -1,8 +1,7 @@
 import os
-from vccweb.app import create_app
+from vccweb.cli import main
 
-# Pull DB URL and other config from environment
-DATABASE_URL = os.environ.get("HVP_DB_URI", "sqlite:///./db.sqlite")
+DATAFILE = os.environ.get("VCCWEB_DATA", "data/samples.csv")
+PASSWORD = os.environ.get("VCCWEB_PASSWORD", "12345")
 
-# Create the Flask app
-app = create_app(database_url=DATABASE_URL)
+main(["--datafile", DATAFILE, "--password", PASSWORD])
