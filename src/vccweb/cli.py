@@ -21,5 +21,3 @@ def main(argv=None):
 
     app = create_app(data, args.password)
     app.run(debug=True)
-
-

@@ -11,22 +11,10 @@ from flask import (
 )
 
 
-def create_app(input_data, shared_password):
-    app = Flask(__name__, static_url_path="/static")
-    app.secret_key = uuid.uuid4().hex
-    app.config["SHARED_PASSWORD"] = shared_password
-    app.config["SESSION_COOKIE_PATH"] = "/"
-    app.config["DATA"] = input_data
-
-    app.register_blueprint(vcc_bp)
-
-    return app
+vcc = Blueprint("vcc", __name__)
 
 
-vcc_bp = Blueprint("vcc", __name__)
-
-
-@vcc_bp.before_request
+@vcc.before_request
 def require_login():
     # If already authenticated, continue
     if session.get("authenticated"):
@@ -49,10 +37,10 @@ def require_login():
     return redirect(url_for("vcc.login", next=request.path))
 
 
-@vcc_bp.route("/login", methods=["GET", "POST"])
+@vcc.route("/login", methods=["GET", "POST"])
 def login():
     error = None
-    next_url = request.args.get("next") or url_for("samples.index")
+    next_url = request.args.get("next") or url_for("vcc.samples")
 
     if request.method == "POST":
         if request.form.get("password") == current_app.config["SHARED_PASSWORD"]:
@@ -63,20 +51,25 @@ def login():
     return render_template("login.html", error=error)
 
 
-@vcc_bp.route("/logout")
+@vcc.route("/logout")
 def logout():
     session.pop("authenticated", None)
     return redirect(url_for("vcc.login"))
 
 
-@vcc_bp.route("/")
-def index():
-    return render_template("index.html")
-
-
-@vcc_bp.route("/samples")
+@vcc.route("/")
 def samples():
     data = current_app.config["DATA"]
     return render_template("samples.html", data=data)
 
 
+def create_app(input_data, shared_password):
+    app = Flask(__name__, static_url_path="/static")
+    app.secret_key = uuid.uuid4().hex
+    app.config["SHARED_PASSWORD"] = shared_password
+    app.config["SESSION_COOKIE_PATH"] = "/"
+    app.config["DATA"] = input_data
+
+    app.register_blueprint(vcc)
+
+    return app
