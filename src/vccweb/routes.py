@@ -13,9 +13,9 @@ from flask import (
 )
 
 
-auth = Blueprint("auth", __name__)
+vcc_bp = Blueprint("vcc", __name__)
 
-@auth.before_request
+@vcc_bp.before_request
 def require_login():
     # If already authenticated, continue
     if session.get("authenticated"):
@@ -26,19 +26,19 @@ def require_login():
         return
 
     # Endpoints allowed without auth
-    exempt_endpoints = {"auth.login", "static"}
+    exempt_endpoints = {"vcc.login", "static"}
     if request.endpoint in exempt_endpoints:
         return
 
     # Prevent redirect loop: don't redirect /login?next=/login
-    if request.path.startswith(url_for("auth.login")):
+    if request.path.startswith(url_for("vcc.login")):
         return
 
     # Redirect to login page with original path as `next`
-    return redirect(url_for("auth.login", next=request.path))
+    return redirect(url_for("vcc.login", next=request.path))
 
 
-@auth.route("/login", methods=["GET", "POST"])
+@vcc_bp.route("/login", methods=["GET", "POST"])
 def login():
     error = None
     next_url = request.args.get("next") or url_for("samples.index")
@@ -52,42 +52,18 @@ def login():
     return render_template("login.html", error=error)
 
 
-@auth.route("/logout")
+@vcc_bp.route("/logout")
 def logout():
     session.pop("authenticated", None)
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("vcc.login"))
 
 
-vcc = Blueprint("vcc", __name__)
-
-### Pages ###
-@vcc.route("/")
+@vcc_bp.route("/")
 def index():
     return render_template("index.html")
 
 
-@vcc.route("/libraries")
+@vcc_bp.route("/samples")
 def samples():
-    header = list(Library.__table__.columns.keys())
-    list(inspect(Library).column_attrs.keys())
-
-    attrs = list(inspect(Model).column_attrs)
-    return render_template("samples.html", columns=columns, date_columns=date_columns)
-
-
-### API ###
-@vcc.route("/api/samples")
-def samples_api():
-    columns = [c.name for c in Sample.__table__.columns]
-    db = g.db
-    samples_data = []
-    for sample in db.query(Sample).all():
-        record = {}
-        for col in columns:
-            value = getattr(sample, col)
-            if isinstance(value, date_type):
-                record[col] = value.isoformat()
-            else:
-                record[col] = value
-        samples_data.append(record)
-    return jsonify({"data": samples_data})
+    data = current_app.config["DATA"]
+    return render_template("samples.html", data=data)

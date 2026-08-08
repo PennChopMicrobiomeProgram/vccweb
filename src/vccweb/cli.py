@@ -33,12 +33,10 @@ def main(argv=None):
             print(requirement.description())
             print(result.message())
 
-    create_db(args.url)
-    print(list(samples_table.columns.keys()))
+    # create_db(args.url)
+    # load_data(args.url, input_data)
 
-    load_data(args.url, input_data)
-
-    #app = create_app(database_url, shared_password)
-    #app.run(debug=True)
+    app = create_app(input_data, args.password)
+    app.run(debug=True)
 
 

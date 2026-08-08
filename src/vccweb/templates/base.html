@@ -93,20 +93,20 @@
   <header class="site-banner">
     <div class="banner-content">
       <div class="banner-left">
-        <a class="logo-link" href="{{ url_for('hvp.index') }}">
+        <a class="logo-link" href="{{ url_for('vcc.index') }}">
           <img src="{{ url_for('static', filename='HVP_logo.svg') }}" alt="Human Virome Project logo">
         </a>
         {% if session.get("authenticated") %}
         <nav class="banner-nav">
-          <a href="{{ url_for('hvp.samples') }}">Samples</a>
+          <a href="{{ url_for('vcc.samples') }}">Samples</a>
         </nav>
         {% endif %}
       </div>
       <div class="banner-actions">
         {% if session.get("authenticated") %}
-        <a class="auth-button" href="{{ url_for('hvp.logout') }}">Logout</a>
+        <a class="auth-button" href="{{ url_for('vcc.logout') }}">Logout</a>
         {% else %}
-        <a class="auth-button" href="{{ url_for('hvp.login') }}">Login</a>
+        <a class="auth-button" href="{{ url_for('vcc.login') }}">Login</a>
         {% endif %}
       </div>
     </div>
