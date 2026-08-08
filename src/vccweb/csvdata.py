@@ -20,7 +20,7 @@ spec = MustHave(
     values_matching("virome_prep_date", date_pattern),
 )
 
-class InputData(Table):
+class SampleData(Table):
     spec = spec
 
     def check(self):

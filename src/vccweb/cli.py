@@ -3,7 +3,7 @@ import argparse
 from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
 
-from vccweb.csvdata import InputData
+from vccweb.csvdata import SampleData
 from vccweb.app import create_app
 from vccweb.models import create_db, samples_table
 from sqlalchemy import inspect
@@ -27,16 +27,16 @@ def main(argv=None):
     args = p.parse_args(argv)
 
     with open(args.samplecsv) as f:
-        input_data = InputData.from_csv(f)
+        data = SampleData.from_csv(f)
 
-        for requirement, result in input_data.check():
+        for requirement, result in data.check():
             print(requirement.description())
             print(result.message())
 
     # create_db(args.url)
     # load_data(args.url, input_data)
 
-    app = create_app(input_data, args.password)
+    app = create_app(data, args.password)
     app.run(debug=True)
 
 
