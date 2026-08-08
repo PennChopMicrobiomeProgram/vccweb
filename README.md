@@ -18,7 +18,7 @@ vccweb --datafile data/mysamples.csv --password 123
 ```
 
 Or put it into production as a system daemon with gunicorn.  Make sure
-to set the env vars `VCCWEB_DATA` and `VCCWEB_PASSWORD` before
+to set the env vars `VCCWEB_DATAFILE` and `VCCWEB_PASSWORD` before
 launching.
 
 ```bash
