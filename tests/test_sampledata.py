@@ -17,3 +17,22 @@ def test_from_csv():
         "storage_buffer": ["neat", "invalid buffer"],
         "sample_use": ["experiment", "invalid use"],
     }
+
+
+def test_column_names():
+    s = SampleData.from_csv(csv_data)
+    assert s.column_names == [
+        "library_id",
+        "participant_id",
+        "body_site",
+        "storage_buffer",
+        "sample_use",
+    ]
+
+
+def test_rows():
+    s = SampleData.from_csv(csv_data)
+    assert list(s.rows) == [
+        ["s1", "p1", "invalid site", "neat", "experiment"],
+        ["s2", "p2", "np swab", "invalid buffer", "invalid use"],
+    ]
