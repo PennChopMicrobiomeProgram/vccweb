@@ -9,8 +9,7 @@ description = "HVP Virome Characterization Center (VCC) sample browser"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-    "Flask~=2.0",
-    "gunicorn",
+    "Flask",
     "tablemusthave",
 ]
 
